@@ -44,3 +44,4 @@ jobs:
         run: |
           uv run notebooks/eval/001_eval_harness.py
           uv run notebooks/eval/002_jsonl_to_sqlite.py
+          uv run notebooks/eval/003_fts5_search.py

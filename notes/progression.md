@@ -33,7 +33,7 @@ Design rationale and options matrix: `notes/storage-design.md`.
 | Topic | Packages | Status |
 |---|---|---|
 | Queryable run history (hybrid schema, generated columns, indexes) | stdlib `sqlite3` [PSF/public domain] | existing — `notebooks/eval/002_jsonl_to_sqlite.py` |
-| Full-text search over run text (bm25, snippets) | sqlite FTS5 (stdlib) | needs notebook |
+| Full-text search over run text (bm25, snippets) | sqlite FTS5 (stdlib) | existing — `notebooks/eval/003_fts5_search.py` |
 | Analytics lens (columnar scans, windows, ablation pivots) | duckdb [MIT] | needs notebook |
 | Search internals from scratch (postings, BM25) | stdlib only | needs notebook |
 | A real engine (segments, block-WAND) | tantivy [MIT] | needs notebook |
