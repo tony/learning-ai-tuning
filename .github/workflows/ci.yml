@@ -46,3 +46,4 @@ jobs:
           uv run notebooks/eval/002_jsonl_to_sqlite.py
           uv run notebooks/eval/003_fts5_search.py
           uv run notebooks/eval/004_duckdb_analytics.py
+          uv run notebooks/eval/005_inverted_index_scratch.py
