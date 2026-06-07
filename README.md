@@ -5,8 +5,9 @@ notebooks — evaluation harnesses (D1), fine-tuning (D2: SFT/PEFT/LoRA/QLoRA), 
 alignment (D3: DPO/RLHF).
 
 Spine: `notes/progression.md`. Method and conventions: `AGENTS.md` (mirrors
-[`learning-notebooks`](../learning-notebooks), the home of the cross-corpus
-taxonomy index).
+[`learning-notebooks`](https://github.com/tony/learning-notebooks), the home of
+the cross-corpus taxonomy index; its local clone lives as a sibling at
+`../learning-notebooks`).
 
 ```bash
 uv sync
