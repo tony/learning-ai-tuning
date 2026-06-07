@@ -43,3 +43,4 @@ jobs:
       - name: Smoke-run light notebooks
         run: |
           uv run notebooks/eval/001_eval_harness.py
+          uv run notebooks/eval/002_jsonl_to_sqlite.py
