@@ -60,6 +60,14 @@ def stub_sentiment_model(text: str) -> str:
     return "pos" if any(word in text.lower() for word in positives) else "neg"
 
 
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## The eval set and the stub model
+    """)
+    return
+
+
 @app.cell
 def _():
     eval_set = [
@@ -79,6 +87,14 @@ def _():
     golds = [label for _, label in eval_set]
     preds = [stub_sentiment_model(text) for text, _ in eval_set]
     return eval_set, golds, preds
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## Metrics
+    """)
+    return
 
 
 @app.cell
@@ -147,6 +163,14 @@ def test_regression_gate(golds, preds):
     return
 
 
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## The regression gate, explored
+    """)
+    return
+
+
 @app.cell
 def _():
     min_accuracy = mo.ui.slider(0.5, 1.0, step=0.05, value=0.8, label="explore: min accuracy")
@@ -165,6 +189,14 @@ def _(accuracy, min_accuracy):
         ),
         kind="success" if _verdict else "danger",
     )
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## Experiment log
+    """)
     return
 
 

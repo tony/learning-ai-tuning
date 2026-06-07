@@ -107,6 +107,14 @@ def _():
     return
 
 
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## The naive baseline
+    """)
+    return
+
+
 @app.cell
 def _():
     # Naive store: same data, no generated columns, no indexes — the baseline.
@@ -114,6 +122,14 @@ def _():
     conn_naive.execute("CREATE TABLE runs (payload TEXT NOT NULL)")
     conn_naive.executemany("INSERT INTO runs (payload) VALUES (?)", [(r,) for r in make_runs()])
     return (conn_naive,)
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## The hybrid schema
+    """)
+    return
 
 
 @app.cell
@@ -211,6 +227,14 @@ def _(conn, conn_naive):
     return
 
 
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## Query gallery
+    """)
+    return
+
+
 @app.cell
 def _():
     min_accuracy = mo.ui.slider(0.70, 0.95, step=0.01, value=0.85, label="min accuracy")
@@ -235,6 +259,14 @@ def _(conn, min_accuracy):
             ),
         ]
     )
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## Failure triage
+    """)
     return
 
 

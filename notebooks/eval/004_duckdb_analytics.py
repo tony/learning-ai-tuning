@@ -88,6 +88,14 @@ def _():
     return con, jsonl_path
 
 
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## Schema inference across shapes
+    """)
+    return
+
+
 @app.cell
 def _(con, jsonl_path):
     schema = con.sql(f"DESCRIBE SELECT * FROM read_json_auto('{jsonl_path}')")
@@ -104,6 +112,14 @@ def _(con, jsonl_path):
         ],
         gap=0.5,
     )
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## The ablation grid
+    """)
     return
 
 
@@ -131,6 +147,14 @@ def _(con, jsonl_path):
         ],
         gap=0.5,
     )
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## Window functions
+    """)
     return
 
 

@@ -117,6 +117,14 @@ def make_docs() -> dict[int, str]:
     }
 
 
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## Tune k1 and b live
+    """)
+    return
+
+
 @app.cell
 def _():
     k1 = mo.ui.slider(0.5, 2.0, step=0.1, value=1.2, label="k1 (tf saturation)")
@@ -131,6 +139,14 @@ def _(b, k1):
     for _doc_id, _text in make_docs().items():
         index.add(_doc_id, _text)
     return (index,)
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## The postings map
+    """)
+    return
 
 
 @app.cell

@@ -103,6 +103,14 @@ def _(searcher):
     return
 
 
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## Query the engine
+    """)
+    return
+
+
 @app.cell
 def _():
     engine_query = mo.ui.text(
