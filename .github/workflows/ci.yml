@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+        with:
+          enable-cache: true
+
+      - name: Install dev tooling
+        run: uv sync
+
+      - name: Lint
+        run: uv run ruff check .
+
+      - name: Format check
+        run: uv run ruff format --check .
+
+      - name: Type check
+        run: uv run ty check
+
+      # marimo's notebook-aware linter. Scoped to .py notebooks only:
+      # `marimo check` treats prose .md files as markdown notebooks.
+      - name: marimo check
+        run: uv run marimo check --strict notebooks/
+
+      # Notebook PEP 723 deps must stay permissively licensed
+      # (deny list: ../learning-notebooks taxonomy "License policy").
+      - name: License deny-list
+        run: uv run scripts/check_licenses.py
+
+      # Each notebook resolves its own PEP 723 deps in an isolated env.
+      # Only LIGHT notebooks here — D2/D3 fine-tuning/alignment notebooks
+      # are heavy and never join this list (see AGENTS.md "CI-safety").
+      - name: Smoke-run light notebooks
+        run: |
+          uv run notebooks/eval/001_eval_harness.py
