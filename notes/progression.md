@@ -20,10 +20,23 @@ study-only · deferred`.
 | Metrics & regression gates | scikit-learn [BSD] (metrics), stdlib `json` (JSONL logs) | existing — `notebooks/eval/001_eval_harness.py` |
 | Dataset curation | datasets [Apache-2.0], evaluate [Apache-2.0] | needs notebook |
 | Eval suites | lm-eval-harness [MIT] | needs notebook · needs architecture link |
-| Queryable run history | stdlib `sqlite3` [PSF] (upgrade path from JSONL) | needs notebook |
 
-The JSONL experiment-log discipline comes from `learning-ai`'s Appendix C
-(`../learning-ai/notes/lesson_plan.md`); `sqlite3` is the additive upgrade.
+### D1 experiment tracking — the run store
+
+Tuning runs produce heterogeneous records by nature: every experiment carries
+different hyperparameter configs and metric sets, plus free text (run notes,
+error messages, prompt snippets). Storing and querying those records — instant
+lookups no matter the shape, full-text search over the text — is the same
+capability MLflow/W&B provide; this sub-track builds it on permissive parts.
+Design rationale and options matrix: `notes/storage-design.md`.
+
+| Topic | Packages | Status |
+|---|---|---|
+| Queryable run history (hybrid schema, generated columns, indexes) | stdlib `sqlite3` [PSF/public domain] | needs notebook |
+| Full-text search over run text (bm25, snippets) | sqlite FTS5 (stdlib) | needs notebook |
+| Analytics lens (columnar scans, windows, ablation pivots) | duckdb [MIT] | needs notebook |
+| Search internals from scratch (postings, BM25) | stdlib only | needs notebook |
+| A real engine (segments, block-WAND) | tantivy [MIT] | needs notebook |
 
 ## D2 — Fine-tuning (SFT / PEFT / LoRA / QLoRA)
 
