@@ -66,7 +66,7 @@ def make_analytics_runs(n: int = 200) -> list[str]:
             "ts": f"2026-{(i // 28) % 12 + 1:02d}-{i % 28 + 1:02d}T{(8 + i % 12):02d}:00:00",
             "gate": (i % 11) != 0,
             "config": {
-                "lr": 10 ** -(2 + i % 3),
+                "lr": 10 ** -(2 + (i // 3) % 3),  # decorrelated from schedule: full 3x3 grid
                 "schedule": schedules[i % 3],
                 **({"warmup": (i % 4) * 100} if i % 2 else {}),  # key present half the time
             },
