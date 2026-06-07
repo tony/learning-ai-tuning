@@ -47,3 +47,4 @@ jobs:
           uv run notebooks/eval/003_fts5_search.py
           uv run notebooks/eval/004_duckdb_analytics.py
           uv run notebooks/eval/005_inverted_index_scratch.py
+          uv run notebooks/eval/006_tantivy_engine.py

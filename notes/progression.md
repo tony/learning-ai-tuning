@@ -36,7 +36,7 @@ Design rationale and options matrix: `notes/storage-design.md`.
 | Full-text search over run text (bm25, snippets) | sqlite FTS5 (stdlib) | existing — `notebooks/eval/003_fts5_search.py` |
 | Analytics lens (columnar scans, windows, ablation pivots) | duckdb [MIT] | existing — `notebooks/eval/004_duckdb_analytics.py` |
 | Search internals from scratch (postings, BM25) | stdlib only | existing — `notebooks/eval/005_inverted_index_scratch.py` |
-| A real engine (segments, block-WAND) | tantivy [MIT] | needs notebook |
+| A real engine (segments, block-WAND) | tantivy [MIT] | existing — `notebooks/eval/006_tantivy_engine.py` |
 
 ## D2 — Fine-tuning (SFT / PEFT / LoRA / QLoRA)
 
