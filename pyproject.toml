@@ -58,6 +58,7 @@ convention = "numpy"
   "B018", # "useless expression" — bare expressions are marimo cell outputs
   "D", # docstring rules don't fit generated cell functions
   "E501", # long lines in mo.md() blocks and source-reading URLs
+  "PLR1711", # marimo closes every cell with a `return` of its exported names
 ]
 
 [tool.ty.src]
