@@ -14,7 +14,7 @@ dev = [
   ### Notebooks ###
   "marimo",
   ### Lint ###
-  "ruff",
+  "ruff>=0.16.0",
   "ty",
 ]
 
@@ -23,7 +23,10 @@ target-version = "py313"
 line-length = 100
 
 [tool.ruff.lint]
-select = [
+# `select` is deliberately unset: ruff 0.16 enables a curated default rule
+# set, and an explicit `select` would replace it rather than extend it.
+# `extend-select` layers this project's additional linters on top.
+extend-select = [
   "E", # pycodestyle
   "F", # pyflakes
   "I", # isort
@@ -55,18 +58,11 @@ convention = "numpy"
   "B018", # "useless expression" — bare expressions are marimo cell outputs
   "D", # docstring rules don't fit generated cell functions
   "E501", # long lines in mo.md() blocks and source-reading URLs
+  "PLR1711", # marimo closes every cell with a `return` of its exported names
 ]
 
 [tool.ty.src]
 include = ["notebooks", "notes", "scripts"]
 
-[tool.ty.rules]
-# Notebook dependencies live in per-notebook sandbox environments (PEP 723),
-# not in this repo's dev env, so imports like sklearn can't resolve here.
-unresolved-import = "ignore"
-
-[[tool.ty.overrides]]
-include = ["notebooks/**"]
-
-[tool.ty.overrides.rules]
-unresolved-attribute = "ignore"
+# ty ignores `[tool.ty]` rules for PEP 723 scripts; the notebook ignores are
+# passed in the workflow instead.

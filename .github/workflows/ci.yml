@@ -25,7 +25,11 @@ jobs:
         run: uv run ruff format --check .
 
       - name: Type check
-        run: uv run ty check
+        run: uv run ty check notes scripts
+
+      # ty ignores `[tool.ty]` rules for PEP 723 scripts.
+      - name: Type check notebooks
+        run: uv run ty check notebooks --ignore unresolved-import --ignore unresolved-attribute
 
       # marimo's notebook-aware linter. Scoped to .py notebooks only:
       # `marimo check` treats prose .md files as markdown notebooks.
