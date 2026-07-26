@@ -64,13 +64,5 @@ convention = "numpy"
 [tool.ty.src]
 include = ["notebooks", "notes", "scripts"]
 
-[tool.ty.rules]
-# Notebook dependencies live in per-notebook sandbox environments (PEP 723),
-# not in this repo's dev env, so imports like sklearn can't resolve here.
-unresolved-import = "ignore"
-
-[[tool.ty.overrides]]
-include = ["notebooks/**"]
-
-[tool.ty.overrides.rules]
-unresolved-attribute = "ignore"
+# ty ignores `[tool.ty]` rules for PEP 723 scripts; the notebook ignores are
+# passed in the workflow instead.
