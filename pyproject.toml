@@ -14,7 +14,7 @@ dev = [
   ### Notebooks ###
   "marimo",
   ### Lint ###
-  "ruff",
+  "ruff>=0.16.0",
   "ty",
 ]
 
