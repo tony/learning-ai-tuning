@@ -109,6 +109,29 @@ uv run scripts/check_licenses.py
 5. `uv run scripts/check_licenses.py` passes (license deny-list).
 6. No absolute local paths or PII (`git grep '/home/'` stays empty).
 
+## Classes with fields
+
+**Classes with fields** — `NamedTuple`, dataclasses — document every field in
+an `Attributes` section:
+
+```python
+class RunConfig(NamedTuple):
+    """Settings one tuning run was launched with.
+
+    Attributes
+    ----------
+    base_model : str
+        Model id the run started from.
+    epochs : int
+        Passes over the training set.
+    """
+```
+
+A type says how a field is shaped, not what it holds. Describing each one
+keeps that meaning next to the code, and anything that renders the class —
+autodoc, a REPL, an editor tooltip — has a description to show instead of a
+bare name.
+
 ## Git Commit Standards
 
 Format commit messages as:
