@@ -56,7 +56,11 @@ License deny-list, scanning every notebook's PEP 723 dependencies:
 $ uv run scripts/check_licenses.py
 ```
 
-All of the above, in the order CI runs them:
+All of the above, in the order CI runs them, except the type check: `just
+check` runs a single bare `ty check` instead of CI's two scoped passes, so
+it reports the notebook PEP 723 imports above as unresolved and fails.
+CI's two-pass invocation is the authority; treat a `just check` failure at
+the type-check step as expected, not as a regression:
 
 ```console
 $ just check
