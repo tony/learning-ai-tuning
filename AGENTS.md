@@ -1,441 +1,65 @@
 # AGENTS.md
 
-This file provides guidance to coding agents (and humans) working in this repository.
-
-## What This Repo Is
-
-The **Domain D (AI Tuning)** study track: marimo notebooks for learning evaluation
-harnesses, fine-tuning (SFT/PEFT/LoRA/QLoRA), and alignment (DPO/RLHF) hands-on.
-Companion to [`learning-notebooks`](https://github.com/tony/learning-notebooks)
-(local sibling clone: `../learning-notebooks`) — same method: each
-notebook is a self-contained, pure-Python file carrying its own dependencies via
-PEP 723 inline script metadata, run in an isolated uv environment (`--sandbox`).
-
-The track spine lives in `notes/progression.md`: **D1 (eval harness) → D2
-(fine-tuning) → D3 (alignment)** — you can't tune what you can't measure, so D1
-comes first. The cross-corpus index is `../learning-notebooks/notes/taxonomy.md`.
-
-## Development Commands
-
-### Essential Commands
-
-Install dev tooling (marimo CLI, ruff, ty):
-
-```bash
-uv sync
-```
-
-Open a notebook in the editor, in its own isolated env:
-
-```bash
-uv run marimo edit --sandbox notebooks/eval/001_eval_harness.py
-```
-
-Run a notebook headlessly as a script:
-
-```bash
-uv run notebooks/eval/001_eval_harness.py
-```
-
-Run `test_*` cells — pytest imports the notebook, which executes its setup
-cell, so the notebook's PEP 723 deps must be passed via `--with` (or use
-`just test <notebook>`):
-
-```bash
-uv run --with pytest --with scikit-learn pytest notebooks/eval/001_eval_harness.py
-```
-
-Lint, format, and type check:
-
-```bash
-uv run ruff check .; \
-uv run ruff format .; \
-uv run ty check
-```
-
-marimo's notebook-aware linter:
-
-```bash
-uv run marimo check --strict notebooks/
-```
-
-License deny-list guard:
-
-```bash
-uv run scripts/check_licenses.py
-```
-
-## Project Structure
-
-- `notebooks/eval/` — D1: metrics, eval suites, regression gates, experiment logs
-- `notebooks/finetuning/` — D2: SFT → LoRA → QLoRA (heavy; never in CI smoke list)
-- `notebooks/alignment/` — D3: reward models → DPO → RLHF (heavy; never in CI)
-- `notes/progression.md` — the D1→D2→D3 study spine
-- New notebooks start from `../learning-notebooks/notes/notebook_template.py`
-
-## Authoring Rules
-
-- Same marimo rules as `learning-notebooks/AGENTS.md` (DAG rule, last expression
-  is the output, no IPython magics, gate expensive work with `mo.ui.run_button()`
-  + `mo.stop()`, wrap model loads in `@mo.persistent_cache`).
-- **Execution modes**: notebooks here use tiny proxy models or stubbed logits
-  in-sandbox; real multi-GPU runs live outside the sandbox. Never in-sandbox
-  monoliths.
-- **License policy**: PEP 723 deps must be permissive (MIT/BSD/Apache-2.0/PSF/ISC);
-  MPL-2.0 is dev/test-only (flagged). Model weights and datasets carry licenses
-  too — prefer Apache-2.0/MIT weights (Qwen, OLMo) and CC0/CC-BY data; keep
-  Llama/Gemma-style community licenses and NC datasets out of automated runs.
-- **CI-safety**: only light notebooks (no model downloads, deps install in
-  seconds) go in the CI smoke-run list. D2/D3 notebooks are heavy by nature —
-  exclude them.
-- **Outline panel reads markdown headings** (h1–h6) from rendered md cells — give
-  every teaching section a `##` heading. Headings inside accordions/tabs/carousels
-  are excluded from the outline; keep them in plain md cells. Every `@app.function`
-  and `@app.class_definition` carries a docstring (the Documentation panel shows it).
-
-## Quality Gates (before committing a notebook)
-
-1. `uv run <notebook>.py` exits 0 (headless script run).
-2. `uv run ruff check .` and `uv run ruff format .` pass.
-3. `uv run ty check` passes.
-4. `uv run marimo check --strict notebooks/` passes.
-5. `uv run scripts/check_licenses.py` passes (license deny-list).
-6. No absolute local paths or PII (`git grep '/home/'` stays empty).
-
-## Classes with fields
-
-**Classes with fields** — `NamedTuple`, dataclasses — document every field in
-an `Attributes` section:
-
-```python
-class RunConfig(NamedTuple):
-    """Settings one tuning run was launched with.
-
-    Attributes
-    ----------
-    base_model : str
-        Model id the run started from.
-    epochs : int
-        Passes over the training set.
-    """
-```
-
-A type says how a field is shaped, not what it holds. Describing each one
-keeps that meaning next to the code, and anything that renders the class —
-autodoc, a REPL, an editor tooltip — has a description to show instead of a
-bare name.
-
-## Git Commit Standards
-
-Format commit messages as:
-
-```
-Scope(type[detail]): concise description
-
-why: Explanation of necessity or impact.
-
-what:
-- Specific technical changes made
-- Focused on a single topic
-```
-
-The blank line between the `why:` block and the `what:` block is
-optional — useful when the `why:` body runs to multiple lines and the
-two sections benefit from visual separation.
-
-Common commit types:
-
-- **feat**: New features or enhancements
-- **fix**: Bug fixes
-- **refactor**: Code restructuring without functional change
-- **docs**: Documentation updates
-- **chore**: Maintenance (dependencies, tooling, config)
-- **test**: Test-related updates
-- **style**: Code style and formatting
-- **py(deps)**: Dependencies
-- **py(deps[dev])**: Dev Dependencies
-- **ai(rules[AGENTS])**: AI rule updates
-- **ai(claude[rules])**: Claude Code rules (CLAUDE.md)
-
-Subjects are plain English. Never put curriculum codes or other
-repo-internal shorthand in the subject line — a reader of
-`git log --oneline` should understand every title cold.
-
-Example:
-
-```
-config(feat[merge]): Add deep-merge support for theme options
-
-why: Enable per-project theme overrides without replacing entire dict
-
-what:
-- Add deep_merge() helper for nested dict merging
-- Update merge_sphinx_config() to deep-merge theme_options
-- Add tests for nested override behavior
-```
-
-For multi-line commits, use heredoc to preserve formatting:
-
-```bash
-git commit -m "$(cat <<'EOF'
-Scope(type[detail]): concise description
-
-why: Explanation of the change.
-
-what:
-- First change
-- Second change
-EOF
-)"
-```
-
-## Documentation Standards
-
-### Code Blocks
-
-Code blocks are paste-and-run units: pasting one block runs exactly one
-intended action. Doctests and other executed examples are exempt — the test
-suite runs them, nobody pastes them.
-
-- **One command per block.** Multiple steps may share a block only when
-  explicitly chained with `&&`, `;`, or `\` continuations — the chain is
-  then one logical command.
-- **Explanations go in prose above the block**, never as `#` comments inside it.
-- **Command menus are per-command blocks with prose lead-ins**, not tables.
-- **Shell commands use the `console` tag with a `$ ` prefix.** This separates
-  interactive commands from scripts and enables prompt-aware copy.
-- **Split long commands with `\`** — one flag or flag+value pair per indented
-  continuation line, positional arguments last.
-
-Good:
-
-Show the last ten commits as a graph:
-
-```console
-$ git log \
-    --max-count=10 \
-    --graph \
-    --oneline
-```
-
-Bad:
-
-```console
-# Show the last ten commits as a graph
-$ git log --max-count=10 --graph --oneline
-```
-
-## Comments earn their maintenance cost
-
-A comment ships only if it passes all three gates. Fail any: delete or rewrite.
-Borderline: delete — borderline means the information is reconstructible, which
-is what makes deletion cheap.
-
-**Loss.** Three years from now, would losing this cost a maintainer real time
-rediscovering intent, an invariant, a constraint, or a failure mode the code and
-tests do not already make obvious?
-
-**Elite.** Would SQLite, Redis, the Go standard library, or CPython write this
-comment, at this length? Those projects state the constraint and stop. They do
-not argue with an imagined objector.
-
-**Upkeep.** Will it stay true without maintenance? A comment that hand-syncs a
-value the code owns — a count, an offset, a line reference, a duplicated
-constant — is false the first time that value moves.
-
-### Ceiling
-
-One or two lines. A comment reaching four is either carrying several facts, in
-which case split it, or arguing, in which case cut it to the fact.
-
-Rationale, alternatives weighed, and the story of how the code got here belong
-in the commit message: timestamped, attached to the exact diff, and free to
-maintain.
-
-A comment often holds both a constraint and the deliberation that found it. Keep
-the constraint, cut the deliberation. "Runs at most once per second" survives;
-"this is the right trade for now" does not.
-
-### Keep
-
-- Why over how: upstream quirks, protocol and compatibility constraints,
-  performance tradeoffs still part of the contract.
-- Invariants, preconditions, ordering, lifetime, and concurrency requirements
-  that types and tests cannot express.
-- Code that looks wrong but is not, so a later cleanup does not reintroduce the
-  bug.
-- A high-level sketch of an algorithm whose local operations do not reveal the
-  whole.
-
-### Delete
-
-- Narration of the next lines; code translated into English.
-- Restated names, types, defaults, or control flow.
-- Values duplicated from the code and hand-synced.
-- Justification, hedging, or apology for a choice.
-- Speculation about future requirements.
-- History version control already holds, including commented-out code.
-- Ticket and issue numbers. They say nothing to a reader without tracker access,
-  and they rot when the tracker moves. Unfinished work goes in the tracker, not
-  the source.
-- Transient observations — "currently", "for now", "the latest release" —
-  that go stale with no nearby edit.
-
-### The upkeep gate in practice
-
-It reaches values that track our own code. It does not reach frozen external
-facts.
-
-Bad (Delete):
-
-```python
-# There are 321 tests to complete for servers.
-```
-
-Good (Keep):
-
-```python
-# CPython < 3.11 has no ExceptionGroup, so this branch stays.
-```
-
-### Documentation exception
-
-Doctests, minimal usage examples, and param, return, and raises lines on public
-API are exempt from the loss gate — they serve the caller, not the maintainer.
-They are exempt from nothing else. Ceiling: a good man page entry.
-
-NumPy-style `Parameters`, `Returns`, and `Attributes` sections and executable
-doctests fall under this exception — autodoc ships every field whether or not
-you describe it, and a doctest that runs is also a test.
-
-## AI Slop Prevention
-
-Treat AI slop as **review-hostile noise**, not as proof that text or
-code is wrong. The goal is to maximize information density by removing
-artifacts that make the repository harder to trust or navigate.
-
-### The Anti-Slop Rubric
-
-Before committing, audit all AI-assisted changes for these noise
-patterns:
-
-- **AI Signatures:** Remove "Generated by", footers, conversational
-  filler ("Certainly!", "Here is..."), unexplained emojis (🤖, ✨), and
-  AI-tool metadata.
-- **Brittle References:** Avoid hard-coded line numbers, fragile
-  file/test counts, dated "as of" claims, bare SHAs, and local
-  absolute paths unless they are strict evidentiary artifacts (e.g.,
-  benchmark logs).
-- **Diff Narration:** Do not restate what moved, was renamed, or was
-  removed in artifacts the downstream reader holds: code, docstrings,
-  README, CHANGES, PR descriptions, or release notes. The diff and
-  commit message already carry this history.
-- **Branch-Internal Narrative:** Do not mention intermediate branch
-  states, abandoned approaches, or "no longer" behavior unless users
-  of a published release actually experienced the old state (**The
-  Published-Release Test**).
-- **Low-Value Scaffolding:** Remove ownerless TODOs (`TODO: revisit`),
-  unused future-proofing, debug artifacts, and defensive wrappers that
-  do not protect a currently reachable failure mode.
-- **Prose Inflation:** Replace generic AI "tells" like *comprehensive,
-  robust, seamless, production-ready, leverage, delve, tapestry,* and
-  *best practices* with concrete descriptions of behavior,
-  constraints, or trade-offs.
-- **Coded Labels:** Write rules, options, and findings as plain
-  imperatives. Don't tag them with codes like `[R1]`, `A1`, or
-  `Option B` in artifacts a human reads — the reader shouldn't have to
-  decode an index. Internal agent bookkeeping may use ids; shipped text
-  may not.
-
-### Durable Source Links
-
-Link to a pinned revision, never to trunk. A pinned permalink is not a
-brittle reference; an unlinked SHA dropped into prose is. `blob/master/…`
-links rot silently — the file moves, lines shift, and the anchor lands
-on unrelated code while still resolving.
-
-- Prefer a release tag (`blob/v1.4.0/…`). Most durable, and it tells
-  the reader which released version the claim held for.
-- Otherwise use a 7-char commit ref (`blob/9a29b1a/…`) reachable from
-  trunk. Use when there is no tag or the claim is about unreleased
-  code. Never a PR-head SHA — it can be rebased or garbage-collected.
-- Reserve `blob/master/…` for living documents meant to always show the
-  latest state, such as a contributing guide.
-- Line anchors (`#L120-L145`) are only safe on a pinned ref.
-
-### Preservation & Context
-
-Subjective cleanup must never remove load-bearing rationale. Adjudicate
-comments with the comment policy above; borderline cases are deleted, not
-kept.
-
-- **Preserve the "Why":** You MUST NOT delete comments that document
-  invariants, protocol constraints, platform quirks, security
-  boundaries, and upstream workarounds.
-- **Evidence is Immune:** Preserve exact counts, dates, and SHAs when
-  they serve as evidence in benchmark results, release notes, stack
-  traces, or lockfiles.
-- **Behavior Over Inventory:** A useful description explains what
-  changed for the *system or user*; it does not provide an inventory
-  of files or functions the diff already shows.
-
-### The Published-Release Test
-
-Long-running branches accumulate tactical decisions — renames,
-refactors, attempts-then-reverts. When deciding what counts as
-branch-internal, use trunk or the parent branch as the baseline — not
-intermediate states inside the current branch. Ask:
-
-> Did users of the most recently published release ever experience
-> this old name, old behavior, or bug?
-
-If the answer is **no**, it is branch-internal narrative. Move it to
-the commit message and describe only the final state in the artifact.
-
-**Keep in shipped artifacts:**
-
-- Deprecations and migration guides for symbols that actually shipped.
-- `### Fixes` entries for bugs that affected users of a published
-  release.
-- Comments explaining *why the current code looks this way*
-  (invariants, platform quirks) that make sense to a reader who never
-  saw the previous version.
-
-### Cleanup in Hindsight
-
-When applying these rules retroactively from inside a feature branch,
-first establish scope by diffing against the parent branch (or trunk)
-to identify which commits this branch actually introduced. Then:
-
-- **In-branch commits:** Prompt the user with two options: `fixup!`
-  commits with `git rebase --autosquash` to address each causal commit
-  at its source, or a single cleanup commit at branch tip.
-- **Trunk/Parent commits:** Default to leaving them alone. Act only on
-  explicit user instruction. If the user opts in, fold the cleanup
-  into a single commit at branch tip; do not rewrite shared history.
-- **Scope guard:** If cleaning prior slop would touch a colleague's
-  work or expand the branch beyond its stated goal, stay in lane:
-  protect the current goal and leave prior slop alone.
-
-### Change Discipline
-
-- Make the smallest coherent change that solves the verified problem;
-  keep unrelated cleanup out of it.
-- Reuse an existing file, component, helper, API, or test before adding
-  a new one. Modify in place when the change fits the file's
-  responsibility.
-- Keep new APIs private until a caller outside the module needs them.
+Personal study repo for Domain D (AI tuning): marimo notebooks on eval
+harnesses (D1), fine-tuning (D2: SFT/PEFT/LoRA/QLoRA), and alignment (D3:
+DPO/RLHF). Companion to [`learning-notebooks`](https://github.com/tony/learning-notebooks)
+(sibling clone at `../learning-notebooks`), which holds the cross-corpus
+taxonomy and architecture studies.
+
+Follow the conventions already in the tree, and keep a change scoped to what
+was asked for.
+
+## What is here
+
+| Path                         | What it is                                            |
+| ----------------------------- | ------------------------------------------------------ |
+| `notebooks/eval/`            | D1: metrics, eval suites, regression gates, experiment logs |
+| `notes/progression.md`       | the D1 → D2 → D3 study spine                          |
+| `notes/storage-design.md`    | run-store design rationale                            |
+| `scripts/check_licenses.py`  | license deny-list gate for notebook PEP 723 deps      |
+| `justfile`                   | task runner: edit/run/test notebooks, quality gates   |
+
+`notebooks/finetuning/` (D2) and `notebooks/alignment/` (D3) do not exist
+yet; `notes/progression.md` tracks what each topic still needs.
+
+## Which policy applies
+
+- Documentation, user-facing text, commit messages, docstrings, and source
+  comments: [.github/WRITING.md](.github/WRITING.md)
+- Environment, the gates, tests, and pull requests:
+  [.github/CONTRIBUTING.md](.github/CONTRIBUTING.md)
+
+Each of those is the single home for its subject. Where a rule seems to be
+stated twice, the file listed above is the one that governs.
+
+## Change discipline
+
+- Make the smallest coherent change that solves the verified problem; keep
+  unrelated cleanup out of it.
+- Reuse an existing file, helper, or notebook pattern before adding a new one.
 - Add a file only for a durable boundary — a distinct responsibility,
-  independent reuse, or splitting an oversized high-touch module — not
-  for a single-use helper or a one-line re-export.
+  independent reuse, or splitting an oversized module — not for a single-use
+  helper or a one-line re-export.
+- A passing gate is evidence only once it has been shown capable of failing.
 
-### Keep Instructions Lean
+## Domain facts
 
-Treat this file like code and prune it.
+- Notebooks use tiny proxy models or stubbed logits in-sandbox; real
+  multi-GPU runs happen outside `uv --sandbox`.
+- Only light notebooks (no model download, deps install in seconds) join the
+  CI smoke-run list; D2/D3 notebooks are heavy by nature and stay out of it.
+- PEP 723 notebook dependencies must be permissively licensed
+  (MIT/BSD/Apache-2.0/PSF/ISC); MPL-2.0 is dev/test-only. Model weights and
+  datasets carry licenses too — prefer Apache-2.0/MIT weights and CC0/CC-BY
+  data; keep community-license weights (Llama/Gemma-style) and NC datasets
+  out of automated runs.
+- Marimo conventions (DAG rule, no IPython magics, gate expensive work
+  behind `mo.ui.run_button()` + `mo.stop()`, cache model loads with
+  `@mo.persistent_cache`) follow `../learning-notebooks/AGENTS.md`.
 
-- Delete a line whose removal would not cause a mistake.
-- Move multi-step procedures into skills, path-specific rules into
-  nested AGENTS.md files, and hard limits into hooks or CI.
-- Keep only non-obvious, broadly applicable defaults here. Anything a
-  reader can infer from the code, a manifest, or a linter does not
-  belong.
+## References
+
+- [`learning-notebooks`](https://github.com/tony/learning-notebooks) — sibling
+  repo, cross-corpus taxonomy and architecture studies
+- [marimo](https://github.com/marimo-team/marimo)
+- `notes/progression.md` — the study spine
