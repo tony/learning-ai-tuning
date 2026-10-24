@@ -239,7 +239,7 @@ def test_analytics_lens(con, jsonl_path):
     }
     assert "warmup" in _cols and "lr" in _cols
     # The ablation grid covers all 9 (schedule, lr) cells.
-    _cells = con.sql(
+    _cells = con.execute(
         f"""
         SELECT count(*) FROM (
             SELECT DISTINCT config.schedule, config.lr FROM read_json_auto('{jsonl_path}')
