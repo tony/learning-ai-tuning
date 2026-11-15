@@ -29,7 +29,7 @@ jobs:
 
       # ty ignores `[tool.ty]` rules for PEP 723 scripts.
       - name: Type check notebooks
-        run: uv run ty check notebooks --ignore unresolved-import --ignore unresolved-attribute
+        run: uv run ty check notebooks --ignore import-not-found --ignore missing-attribute
 
       # marimo's notebook-aware linter. Scoped to .py notebooks only:
       # `marimo check` treats prose .md files as markdown notebooks.
